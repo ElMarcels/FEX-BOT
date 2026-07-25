@@ -10,52 +10,61 @@ export const authRouter = Router();
 
 const registerSchema = z.object({
   username: z.string().min(3).max(30),
-  email: z.preprocess((value) => (value === "" ? undefined : value), z.string().email().optional()),
-  password: z.string().min(8).max(200),
-  inviteCode: z.string().min(3).max(120)
+  email: z.preprocess((value) => (value === "" || value === undefined ? undefined : value), z.string().email().optional()),
+  password: z.string().min(4).max(200)
 });
 
 authRouter.post("/register", authLimiter, async (req, res) => {
-  const parsed = registerSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
-
-  const invite = await prisma.invite.findUnique({
-    where: { code: parsed.data.inviteCode },
-    include: { uses: true }
-  });
-
-  if (!invite || !invite.active) return res.status(403).json({ error: "Invalid invite" });
-  if (invite.expiresAt && invite.expiresAt < new Date()) return res.status(403).json({ error: "Invite expired" });
-  if (invite.maxUses && invite.uses.length >= invite.maxUses) return res.status(403).json({ error: "Invite exhausted" });
-
-  const existing = await prisma.user.findFirst({
-    where: { OR: [{ username: parsed.data.username }, { email: parsed.data.email?.toLowerCase() }] }
-  });
-  if (existing) return res.status(409).json({ error: "Username or email already exists" });
-
-  const passwordHash = await bcrypt.hash(parsed.data.password, 12);
-  const user = await prisma.user.create({
-    data: {
-      username: cleanText(parsed.data.username, 30),
-      email: parsed.data.email?.toLowerCase(),
-      passwordHash,
-      usedInvitations: { create: { inviteId: invite.id } }
+  try {
+    const parsed = registerSchema.safeParse(req.body);
+    if (!parsed.success) {
+      console.error("Register validation error:", parsed.error.flatten());
+      return res.status(400).json({ error: "Usuario minimo 3 caracteres, contrasena minimo 4 caracteres" });
     }
-  });
 
-  res.json({ token: signUser(user), user: publicUser(user) });
+    const existing = await prisma.user.findFirst({
+      where: { username: parsed.data.username.toLowerCase() }
+    });
+    if (existing) return res.status(409).json({ error: "Este usuario ya existe" });
+
+    const passwordHash = await bcrypt.hash(parsed.data.password, 10);
+    const user = await prisma.user.create({
+      data: {
+        username: parsed.data.username.toLowerCase(),
+        email: parsed.data.email?.toLowerCase() || null,
+        passwordHash
+      }
+    });
+
+    res.json({ token: signUser(user), user: publicUser(user) });
+  } catch (error) {
+    console.error("Register error:", error);
+    res.status(500).json({ error: "Error al crear cuenta" });
+  }
 });
 
 authRouter.post("/login", authLimiter, async (req, res) => {
-  const username = cleanText(req.body.username, 60);
-  const password = String(req.body.password || "");
-  const user = await prisma.user.findFirst({
-    where: { OR: [{ username }, { email: username.toLowerCase() }] }
-  });
-  if (!user?.passwordHash) return res.status(401).json({ error: "Invalid credentials" });
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
-  res.json({ token: signUser(user), user: publicUser(user) });
+  try {
+    const username = String(req.body.username || "").toLowerCase().trim();
+    const password = String(req.body.password || "");
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "Usuario y contrasena requeridos" });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { OR: [{ username }, { email: username }] }
+    });
+    if (!user || !user.passwordHash) return res.status(401).json({ error: "Usuario o contrasena incorrectos" });
+
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) return res.status(401).json({ error: "Usuario o contrasena incorrectos" });
+
+    res.json({ token: signUser(user), user: publicUser(user) });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Error al iniciar sesion" });
+  }
 });
 
 authRouter.get("/me", requireAuth, (req, res) => {
