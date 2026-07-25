@@ -2,13 +2,13 @@ FROM node:20-slim
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm install
 
-COPY prisma ./prisma/
+COPY backend/prisma ./prisma/
 RUN npx prisma generate
 
-COPY . .
+COPY backend/ .
 
 EXPOSE 3001
 CMD ["node", "src/index.js"]
