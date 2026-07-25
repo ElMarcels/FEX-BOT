@@ -6,6 +6,7 @@ import { config } from "./config.js";
 import { adminRouter } from "./routes/admin.js";
 import { authRouter } from "./routes/auth.js";
 import { chatsRouter } from "./routes/chats.js";
+import { googleRouter } from "./routes/google.js";
 import { memoryRouter } from "./routes/memory.js";
 import { organizationRouter } from "./routes/organization.js";
 import { telegramRouter } from "./telegram/webhook.js";
@@ -24,6 +25,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/auth", googleRouter);
 app.use("/api/chats", chatsRouter);
 app.use("/api", organizationRouter);
 app.use("/api/memory", memoryRouter);

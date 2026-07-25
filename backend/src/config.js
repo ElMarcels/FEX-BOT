@@ -11,6 +11,7 @@ export const config = {
   ollamaModel: process.env.OLLAMA_MODEL || "qwen2.5-coder:7b",
   compatibleBaseUrl: process.env.OPENAI_COMPATIBLE_BASE_URL || "",
   compatibleApiKey: process.env.OPENAI_COMPATIBLE_API_KEY || "",
-  compatibleModel: process.env.OPENAI_COMPATIBLE_MODEL || ""
+  compatibleModel: process.env.OPENAI_COMPATIBLE_MODEL || "",
+  googleClientId: process.env.GOOGLE_CLIENT_ID || ""
 };
 
