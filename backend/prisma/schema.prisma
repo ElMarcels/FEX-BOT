@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Sender {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model User {
+  id              String           @id @default(cuid())
+  email           String?          @unique
+  username        String           @unique
+  passwordHash    String?
+  role            Role             @default(USER)
+  telegramId      String?          @unique
+  telegramName    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  folders         Folder[]
+  categories      Category[]
+  chats           Chat[]
+  memories        Memory[]
+  usedInvitations InvitationUse[]
+}
+
+model Invite {
+  id        String          @id @default(cuid())
+  code      String          @unique
+  maxUses   Int?
+  expiresAt DateTime?
+  active    Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  uses      InvitationUse[]
+}
+
+model InvitationUse {
+  id        String   @id @default(cuid())
+  inviteId  String
+  userId    String
+  createdAt DateTime @default(now())
+  invite    Invite   @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([inviteId, userId])
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chats     Chat[]
+
+  @@index([userId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#7c3aed")
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chats     Chat[]
+
+  @@index([userId])
+}
+
+model Chat {
+  id         String     @id @default(cuid())
+  title      String
+  userId     String
+  folderId   String?
+  categoryId String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder     Folder?    @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  category   Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  messages   Message[]
+
+  @@index([userId, updatedAt])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  sender    Sender
+  content   String
+  createdAt DateTime @default(now())
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+}
+
+model Memory {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  value     String
+  source    String   @default("chat")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}
+
