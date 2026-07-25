@@ -99,14 +99,13 @@ export default function LoginPage() {
                 data-callback="googleSignIn"
                 data-auto_prompt="false">
               </div>
-              <div className="g_id_signin"
+              <div className="g_id_signin w-full"
                 data-type="standard"
                 data-shape="rectangular"
                 data-theme="outline"
                 data-text="sign_in_with"
                 data-size="large"
-                data-width="300"
-                className="w-full">
+                data-width="300">
               </div>
               <div className="relative my-2">
                 <div className="absolute inset-0 flex items-center">
