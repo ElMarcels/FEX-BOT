@@ -5,7 +5,7 @@ export default function Home() {
     <main className="min-h-screen bg-fex-bg px-6 py-10">
       <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-between">
         <div className="pt-16">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-fex-accent">AI Assistant</p>
+          <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-fex-accent">Invite-only AI</p>
           <h1 className="max-w-3xl text-5xl font-bold leading-tight md:text-7xl">Fex</h1>
           <p className="mt-5 max-w-2xl text-lg text-fex-muted">
             Tu asistente de IA personal. Responde sobre cualquier tema: programacion, ciencia, idiomas, creatividad y mas.

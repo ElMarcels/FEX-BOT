@@ -11,12 +11,22 @@ export const authRouter = Router();
 const registerSchema = z.object({
   username: z.string().min(3).max(30),
   email: z.preprocess((value) => (value === "" ? undefined : value), z.string().email().optional()),
-  password: z.string().min(4).max(200)
+  password: z.string().min(8).max(200),
+  inviteCode: z.string().min(3).max(120)
 });
 
 authRouter.post("/register", authLimiter, async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+
+  const invite = await prisma.invite.findUnique({
+    where: { code: parsed.data.inviteCode },
+    include: { uses: true }
+  });
+
+  if (!invite || !invite.active) return res.status(403).json({ error: "Invalid invite" });
+  if (invite.expiresAt && invite.expiresAt < new Date()) return res.status(403).json({ error: "Invite expired" });
+  if (invite.maxUses && invite.uses.length >= invite.maxUses) return res.status(403).json({ error: "Invite exhausted" });
 
   const existing = await prisma.user.findFirst({
     where: { OR: [{ username: parsed.data.username }, { email: parsed.data.email?.toLowerCase() }] }
@@ -28,7 +38,8 @@ authRouter.post("/register", authLimiter, async (req, res) => {
     data: {
       username: cleanText(parsed.data.username, 30),
       email: parsed.data.email?.toLowerCase(),
-      passwordHash
+      passwordHash,
+      usedInvitations: { create: { inviteId: invite.id } }
     }
   });
 
