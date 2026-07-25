@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Folder, FolderPlus, Tag, TagPlus, Trash2 } from "lucide-react";
+import { Folder, FolderPlus, Tag, Plus, Trash2 } from "lucide-react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Shell } from "../../components/Shell";
@@ -74,7 +74,7 @@ export default function ChatsPage() {
             </div>
             <div className="mt-4 flex gap-2">
               <Input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} placeholder="Nueva categoria" onKeyDown={(e) => e.key === "Enter" && createCategory()} />
-              <Button onClick={createCategory} className="px-3"><TagPlus size={18} /></Button>
+              <Button onClick={createCategory} className="px-3"><Plus size={18} /></Button>
             </div>
             <div className="mt-4 grid gap-2">
               {categories.length === 0 && <div className="text-sm text-fex-muted">No hay categorias aun</div>}
