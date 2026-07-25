@@ -2,8 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Fex",
-  description: "Invite-only programming assistant"
+  title: "Fex - AI Assistant",
+  description: "Tu asistente de IA para cualquier cosa"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -13,4 +13,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-

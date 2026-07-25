@@ -1,9 +1,9 @@
 import { config } from "../config.js";
 
-const SYSTEM_PROMPT = `Eres Fex, un chatbot de IA experto en programacion.
-Responde en el idioma del usuario. Ayuda con arquitectura, debugging, frontend,
-backend, bases de datos, despliegue, seguridad y buenas practicas. Se concreto,
-explica los pasos importantes y pide contexto solo cuando sea necesario.`;
+const SYSTEM_PROMPT = `Eres Fex, un asistente de IA util y amigable. Responde en el idioma del usuario.
+Puedes ayudar con cualquier tema: programacion, ciencia, matematicas, idiomas,
+creatividad, consejos, explicaciones, traducciones, resumen de textos, y mucho mas.
+Se claro, conciso y util. Si no sabes algo, dilo honestamente.`;
 
 export async function generateReply({ messages, memories }) {
   const memoryText = memories.length
