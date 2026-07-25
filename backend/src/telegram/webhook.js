@@ -9,6 +9,7 @@ export const telegramRouter = Router();
 
 telegramRouter.post("/webhook", telegramLimiter, async (req, res) => {
   if (config.telegramWebhookSecret && req.headers["x-telegram-bot-api-secret-token"] !== config.telegramWebhookSecret) {
+    console.error("Telegram webhook secret mismatch");
     return res.status(401).json({ error: "Invalid Telegram secret" });
   }
 
